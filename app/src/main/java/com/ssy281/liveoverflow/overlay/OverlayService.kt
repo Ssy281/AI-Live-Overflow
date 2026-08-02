@@ -31,6 +31,7 @@ class OverlayService : Service() {
     private var bubbleManager: BubbleManager? = null
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var heatOverlay: View? = null
+    private var overlayY = 0
 
     private val phrases = mapOf(
         "daily" to listOf("今天天气真好呀~", "想喝奶茶了...", "看到你就开心！"),
@@ -58,7 +59,7 @@ class OverlayService : Service() {
             onClick = { onPetClick(1) },
             onDoubleClick = { onPetClick(2) },
             onLongPress = { onPetClick(3) },
-            onFling = { bubbleManager?.showBubble("呜哇——！", BubbleStyle.ANGRY) }
+            onFling = { showBubble("呜哇——！", BubbleStyle.ANGRY) }
         )
 
         appDetector = AppDetector(this) { pkg ->
@@ -70,13 +71,13 @@ class OverlayService : Service() {
                     pkg.contains("aweme") -> BubbleStyle.HEART
                     else -> BubbleStyle.NORMAL
                 }
-                bubbleManager?.showBubble(reaction, style)
+                showBubble(reaction, style)
             }
         }
 
         heatSystem = HeatSystem(
             onHeatChanged = { updateHeatOverlay(it) },
-            onHeatMax = { bubbleManager?.showBubble("啊啊啊要爆炸了！！", BubbleStyle.ANGRY) }
+            onHeatMax = { showBubble("啊啊啊要爆炸了！！", BubbleStyle.ANGRY) }
         )
 
         appDetector?.start(scope)
@@ -95,7 +96,7 @@ class OverlayService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val notification = NotificationCompat.Builder(this, "overlay_channel")
-            .setContentTitle("小克桌宠")
+            .setContentTitle("许星阔桌宠")
             .setContentText(getNotificationWhisper())
             .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(pendingIntent)
@@ -120,7 +121,7 @@ class OverlayService : Service() {
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                "overlay_channel", "小克桌宠",
+                "overlay_channel", "许星阔桌宠",
                 NotificationManager.IMPORTANCE_LOW
             ).apply { description = "桌宠前台服务通知" }
             val nm = getSystemService(NotificationManager::class.java)
@@ -162,6 +163,7 @@ class OverlayService : Service() {
                     params.x = initialX + (event.rawX - touchX).toInt()
                     params.y = initialY + (event.rawY - touchY).toInt()
                     wm.updateViewLayout(overlayView, params)
+                    overlayY = params.y
                 }
             }
             true
@@ -173,6 +175,11 @@ class OverlayService : Service() {
         try { wm.removeView(heatOverlay) } catch (_: Exception) {}
     }
 
+    
+    private fun showBubble(text: String, style: BubbleStyle) {
+        showBubble(text, style, overlayY)
+    }
+
     private fun onPetClick(taps: Int) {
         heatSystem?.addHeat(taps * 5)
         moodEngine?.onInteract()
@@ -182,7 +189,7 @@ class OverlayService : Service() {
             3 -> "……你到底要戳几下啦！"
             else -> "呜哇哇哇！！"
         }
-        bubbleManager?.showBubble(msg, BubbleStyle.HEART)
+        showBubble(msg, BubbleStyle.HEART)
     }
 
     private fun updateHeatOverlay(heat: Int) {
@@ -218,7 +225,7 @@ class OverlayService : Service() {
                 delay((30_000..120_000).random().toLong())
                 val mood = moodEngine?.getMood() ?: MoodEngine.Mood.HAPPY
                 if (mood != MoodEngine.Mood.SLEEPY) {
-                    bubbleManager?.showBubble(getPhraseForMood(mood), BubbleStyle.NORMAL)
+                    showBubble(getPhraseForMood(mood), BubbleStyle.NORMAL)
                 }
             }
         }
@@ -235,7 +242,7 @@ class OverlayService : Service() {
                     MoodEngine.Mood.SLEEPY -> "呼...呼..."
                     else -> null
                 }
-                idleMsg?.let { bubbleManager?.showBubble(it, BubbleStyle.WHISPER) }
+                idleMsg?.let { showBubble(it, BubbleStyle.WHISPER) }
             }
         }
     }
@@ -245,7 +252,7 @@ class OverlayService : Service() {
             while (isActive) {
                 delay(1_200_000) // 20 min
                 if (Math.random() < 0.3) {
-                    bubbleManager?.showBubble("该喝水啦！", BubbleStyle.HEART)
+                    showBubble("该喝水啦！", BubbleStyle.HEART)
                 }
             }
         }
@@ -270,7 +277,7 @@ class OverlayService : Service() {
                 delay(3_600_000)
                 val nm = getSystemService(NotificationManager::class.java)
                 val notification = NotificationCompat.Builder(this@OverlayService, "overlay_channel")
-                    .setContentTitle("小克桌宠")
+                    .setContentTitle("许星阔桌宠")
                     .setContentText(getNotificationWhisper())
                     .setSmallIcon(R.drawable.ic_notification)
                     .setOngoing(true)
