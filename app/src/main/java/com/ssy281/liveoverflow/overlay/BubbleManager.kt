@@ -18,7 +18,8 @@ class BubbleManager(private val context: Context) {
     private var bubbleView: View? = null
     private val handler = Handler(Looper.getMainLooper())
 
-    fun showBubble(text: String, style: BubbleStyle) {
+        fun showBubble(text: String, style: BubbleStyle, overlayY: Int = 120) {
+        val bubbleY = if (overlayY > 180) overlayY - 160 else 80
         handler.post {
             removeBubble()
 
@@ -40,7 +41,7 @@ class BubbleManager(private val context: Context) {
                 PixelFormat.TRANSLUCENT
             ).apply {
                 gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-                y = 120
+                y = bubbleY
             }
 
             wm.addView(tv, params)
