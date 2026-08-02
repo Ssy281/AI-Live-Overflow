@@ -147,17 +147,15 @@ public class OverlayService extends Service {
                         windowManager.updateViewLayout(overlayView, params);
                         return true;
                     case MotionEvent.ACTION_UP:
+                        long duration = System.currentTimeMillis() - downTime;
                         float dx = event.getRawX() - initialTouchX;
                         float dy = event.getRawY() - initialTouchY;
-                        long duration = System.currentTimeMillis() - downTime;
-                        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
-                            if (duration > 600) {
-                                // 长按：用第三组撒娇台词
-                                onPetClick(3);
-                            } else {
-                                // 短按：随机台词
-                                onPetClick(random.nextInt(2) == 0 ? 1 : 2);
-                            }
+                        if (duration > 500) {
+                            // 长按：按住超过半秒直接触发第三组撒娇台词，不受位移影响
+                            onPetClick(3);
+                        } else if (Math.abs(dx) < 15 && Math.abs(dy) < 15) {
+                            // 短按：随机台词
+                            onPetClick(random.nextInt(2) == 0 ? 1 : 2);
                         }
                         return true;
                 }
