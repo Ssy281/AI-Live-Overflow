@@ -5,26 +5,22 @@
     android:gravity="center"
     android:orientation="vertical"
     android:padding="32dp">
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="小克桌宠"
+        android:text="许星阔桌宠"
         android:textSize="28sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="点击下方按钮启动桌宠"
         android:textSize="16sp"
         android:layout_marginBottom="32dp" />
-
     <Button
         android:id="@+id/btn_start_overlay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="启动小克" />
-
+        android:text="启动许星阔" />
 </LinearLayout>
