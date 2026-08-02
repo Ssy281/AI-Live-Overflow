@@ -29,4 +29,5 @@ dependencies {
     }
     implementation("androidx.core:core:1.12.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.22")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 }
