@@ -79,6 +79,19 @@ public class OverlayService extends Service {
         startAppDetection();
         startIdleBubble();
         startDrinkReminder();
+        // 检查使用情况访问权限
+        checkUsageStatsPermission();
+    }
+    
+    private void checkUsageStatsPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            UsageStatsManager usm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+            long now = System.currentTimeMillis();
+            List<UsageStats> stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, now - 1000, now);
+            if (stats == null || stats.isEmpty()) {
+                showBubble("给我「使用情况访问」权限，就能看到切应用啦~");
+            }
+        }
     }
 
     private void createNotificationChannel() {
@@ -237,13 +250,17 @@ public class OverlayService extends Service {
             @Override
             public void run() {
                 checkForegroundApp();
-                appCheckHandler.postDelayed(this, 2000);
+                appCheckHandler.postDelayed(this, 1200);
             }
-        }, 2000);
+        }, 1200);
     }
 
     private void checkForegroundApp() {
         String pkg = getForegroundPackage();
+        // 如果始终返回自身包名，说明未授予"使用情况访问权限"
+        if (pkg != null && pkg.equals(getPackageName())) {
+            return; // 权限未授予时静默跳过，不重复提示
+        }
         if (pkg != null && !pkg.equals(lastPkg)) {
             String reaction;
             if (pkg.contains("taobao") || pkg.contains("jingdong")) {
@@ -273,7 +290,7 @@ public class OverlayService extends Service {
                 UsageStatsManager usm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
                 long time = System.currentTimeMillis();
                 List<UsageStats> stats = usm.queryUsageStats(
-                        UsageStatsManager.INTERVAL_DAILY, time - 5000, time);
+                        UsageStatsManager.INTERVAL_DAILY, time - 8000, time);
                 if (stats != null && !stats.isEmpty()) {
                     UsageStats recent = null;
                     for (UsageStats s : stats) {
