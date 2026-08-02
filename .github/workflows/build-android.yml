@@ -33,15 +33,15 @@ jobs:
             -storepass release123 \
             -keypass release123 \
             -dname "CN=AI Live Overflow, OU=Dev, O=AI Live Overflow, L=Beijing, ST=Beijing, C=CN"
-      - name: Sign APK with jarsigner
+      - name: Sign APK with apksigner (v1+v2+v3)
         run: |
-          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
-            -keystore release.jks \
-            -storepass release123 \
-            -keypass release123 \
-            app/build/outputs/apk/release/app-release-unsigned.apk \
-            release
-          cp app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release.apk
+          $ANDROID_HOME/build-tools/35.0.0/apksigner sign \
+            --ks release.jks \
+            --ks-key-alias release \
+            --ks-pass pass:release123 \
+            --key-pass pass:release123 \
+            --out app/build/outputs/apk/release/app-release.apk \
+            app/build/outputs/apk/release/app-release-unsigned.apk
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
