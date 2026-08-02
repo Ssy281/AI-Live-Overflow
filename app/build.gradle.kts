@@ -1,11 +1,9 @@
 plugins {
     id("com.android.application")
 }
-
 android {
     namespace = "com.ssy281.liveoverflow"
     compileSdk = 34
-
     defaultConfig {
         applicationId = "com.ssy281.liveoverflow"
         minSdk = 24
@@ -13,7 +11,6 @@ android {
         versionCode = 1
         versionName = "1.0.0"
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -24,4 +21,8 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+}
+dependencies {
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.core:core:1.12.0")
 }
