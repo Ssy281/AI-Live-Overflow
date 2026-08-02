@@ -31,7 +31,6 @@ class OverlayService : Service() {
     private var bubbleManager: BubbleManager? = null
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var heatOverlay: View? = null
-    private var overlayY = 0
 
     private val phrases = mapOf(
         "daily" to listOf("今天天气真好呀~", "想喝奶茶了...", "看到你就开心！"),
@@ -59,7 +58,7 @@ class OverlayService : Service() {
             onClick = { onPetClick(1) },
             onDoubleClick = { onPetClick(2) },
             onLongPress = { onPetClick(3) },
-            onFling = { showBubble("呜哇——！", BubbleStyle.ANGRY) }
+            onFling = { bubbleManager?.showBubble("呜哇——！", BubbleStyle.ANGRY) }
         )
 
         appDetector = AppDetector(this) { pkg ->
@@ -71,13 +70,13 @@ class OverlayService : Service() {
                     pkg.contains("aweme") -> BubbleStyle.HEART
                     else -> BubbleStyle.NORMAL
                 }
-                showBubble(reaction, style)
+                bubbleManager?.showBubble(reaction, style)
             }
         }
 
         heatSystem = HeatSystem(
             onHeatChanged = { updateHeatOverlay(it) },
-            onHeatMax = { showBubble("啊啊啊要爆炸了！！", BubbleStyle.ANGRY) }
+            onHeatMax = { bubbleManager?.showBubble("啊啊啊要爆炸了！！", BubbleStyle.ANGRY) }
         )
 
         appDetector?.start(scope)
@@ -163,7 +162,6 @@ class OverlayService : Service() {
                     params.x = initialX + (event.rawX - touchX).toInt()
                     params.y = initialY + (event.rawY - touchY).toInt()
                     wm.updateViewLayout(overlayView, params)
-                    overlayY = params.y
                 }
             }
             true
@@ -175,11 +173,6 @@ class OverlayService : Service() {
         try { wm.removeView(heatOverlay) } catch (_: Exception) {}
     }
 
-    
-    private fun showBubble(text: String, style: BubbleStyle) {
-        showBubble(text, style, overlayY)
-    }
-
     private fun onPetClick(taps: Int) {
         heatSystem?.addHeat(taps * 5)
         moodEngine?.onInteract()
@@ -189,7 +182,7 @@ class OverlayService : Service() {
             3 -> "……你到底要戳几下啦！"
             else -> "呜哇哇哇！！"
         }
-        showBubble(msg, BubbleStyle.HEART)
+        bubbleManager?.showBubble(msg, BubbleStyle.HEART)
     }
 
     private fun updateHeatOverlay(heat: Int) {
@@ -225,7 +218,7 @@ class OverlayService : Service() {
                 delay((30_000..120_000).random().toLong())
                 val mood = moodEngine?.getMood() ?: MoodEngine.Mood.HAPPY
                 if (mood != MoodEngine.Mood.SLEEPY) {
-                    showBubble(getPhraseForMood(mood), BubbleStyle.NORMAL)
+                    bubbleManager?.showBubble(getPhraseForMood(mood), BubbleStyle.NORMAL)
                 }
             }
         }
@@ -242,7 +235,7 @@ class OverlayService : Service() {
                     MoodEngine.Mood.SLEEPY -> "呼...呼..."
                     else -> null
                 }
-                idleMsg?.let { showBubble(it, BubbleStyle.WHISPER) }
+                idleMsg?.let { bubbleManager?.showBubble(it, BubbleStyle.WHISPER) }
             }
         }
     }
@@ -252,7 +245,7 @@ class OverlayService : Service() {
             while (isActive) {
                 delay(1_200_000) // 20 min
                 if (Math.random() < 0.3) {
-                    showBubble("该喝水啦！", BubbleStyle.HEART)
+                    bubbleManager?.showBubble("该喝水啦！", BubbleStyle.HEART)
                 }
             }
         }
