@@ -263,11 +263,11 @@ public class OverlayService extends Service {
         }
         if (pkg != null && !pkg.equals(lastPkg)) {
             String reaction;
-            if (pkg.contains("taobao") || pkg.contains("jingdong")) {
+            if (pkg.contains("taobao") || pkg.contains("tmall") || pkg.contains("jingdong") || pkg.contains("pinduoduo")) {
                 reaction = "买东西？我帮你挑！";
-            } else if (pkg.contains("bilibili") || pkg.contains("aweme")) {
+            } else if (pkg.contains("bilibili") || pkg.contains("bili") || pkg.contains("aweme") || pkg.contains("douyin") || pkg.contains("kuaishou") || pkg.contains("xiaohongshu")) {
                 reaction = "在刷视频呢？";
-            } else if (pkg.contains("weixin") || pkg.contains("tencent.mm") || pkg.contains("qq")) {
+            } else if (pkg.contains("weixin") || pkg.contains("tencent.mm") || pkg.contains("tencent.mobileqq") || pkg.contains("qq")) {
                 reaction = "聊天呢？我也在~";
             } else if (pkg.contains("com.android")) {
                 reaction = "";
