@@ -42,7 +42,7 @@ public class OverlayService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     "overlay_channel",
-                    "小克桌宠",
+                    "许星阔桌宠",
                     NotificationManager.IMPORTANCE_LOW
             );
             channel.setDescription("桌宠悬浮窗运行中");
@@ -60,7 +60,7 @@ public class OverlayService extends Service {
         );
 
         return new NotificationCompat.Builder(this, "overlay_channel")
-                .setContentTitle("小克桌宠")
+                .setContentTitle("许星阔桌宠")
                 .setContentText("正在运行中…")
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentIntent(pendingIntent)
@@ -106,7 +106,7 @@ public class OverlayService extends Service {
                         float dx = event.getRawX() - initialTouchX;
                         float dy = event.getRawY() - initialTouchY;
                         if (Math.abs(dx) < 5 && Math.abs(dy) < 5) {
-                            Toast.makeText(OverlayService.this, "小克在此~", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(OverlayService.this, "许星阔在此~", Toast.LENGTH_SHORT).show();
                         }
                         return true;
                 }
