@@ -70,7 +70,7 @@ public class OverlayService extends Service {
 
     private void createOverlayView() {
         overlayView = new ImageView(this);
-        ((ImageView) overlayView).setImageResource(android.R.drawable.ic_menu_compass);
+        ((ImageView) overlayView).setImageResource(R.mipmap.ic_launcher);
 
         params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
