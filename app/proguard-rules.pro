@@ -1,0 +1,2 @@
+-keep class com.ssy281.liveoverflow.** { *; }
+-dontwarn io.github.jan.supabase.**
