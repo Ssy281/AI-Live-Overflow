@@ -26,7 +26,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
+import android.app.AlertDialog;
 import androidx.core.app.NotificationCompat;
 
 import com.ssy281.liveoverflow.MainActivity;
@@ -195,7 +195,7 @@ public class OverlayService extends Service {
     private void showPetMenu() {
         if (menuDialog != null && menuDialog.isShowing()) return;
         final String[] items = {"自动", "普通", "心动", "悄悄话", "生气", "吃醋", "停止桌宠"};
-        menuDialog = new AlertDialog.Builder(this)
+        menuDialog = new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
                 .setTitle("许星阔的控制菜单")
                 .setItems(items, (dialog, which) -> {
                     switch (which) {
