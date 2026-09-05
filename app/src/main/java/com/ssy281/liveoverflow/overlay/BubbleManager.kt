@@ -12,11 +12,14 @@ import android.view.WindowManager
 import android.widget.TextView
 import android.widget.LinearLayout
 import android.util.TypedValue
+import com.ssy281.liveoverflow.R
 
 class BubbleManager(private val context: Context) {
     private val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private var bubbleView: View? = null
     private val handler = Handler(Looper.getMainLooper())
+
+    private fun dp(v: Float): Int = (v * context.resources.displayMetrics.density).toInt()
 
         fun showBubble(text: String, style: BubbleStyle, overlayY: Int = 120) {
         val bubbleY = if (overlayY > 180) overlayY - 160 else 80
@@ -26,9 +29,11 @@ class BubbleManager(private val context: Context) {
             val tv = TextView(context).apply {
                 this.text = text
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                setPadding(24, 18, 24, 18)
-                setBackgroundColor(style.bgColor)
+                setBackgroundResource(style.bgRes)
                 setTextColor(style.textColor)
+                setPadding(dp(style.padL), dp(style.padT), dp(style.padR), dp(style.padB))
+                minWidth = dp(style.minW)
+                minHeight = dp(style.minH)
                 gravity = Gravity.CENTER
                 elevation = 8f
             }
@@ -73,12 +78,46 @@ class BubbleManager(private val context: Context) {
     }
 }
 
-data class BubbleStyle(val bgColor: Int, val textColor: Int) {
+/**
+ * 气泡皮肤 = 手绘9-patch底图 + 文字配色 + 内容留白(contentInsets) + 最小尺寸(原图dp尺寸)
+ * 数据源自 Cute-bubbles (zaochuanyitian)：capInsets 决定拉伸保护(装饰不变形)，
+ * contentInsets 决定文字距边距离。9-patch 图在 drawable-nodpi/。
+ */
+data class BubbleStyle(
+    val bgRes: Int,
+    val textColor: Int,
+    val padL: Float, val padT: Float, val padR: Float, val padB: Float,
+    val minW: Float, val minH: Float
+) {
     companion object {
-        val NORMAL = BubbleStyle(0xFFF5F5F5.toInt(), 0xFF333333.toInt())
-        val HEART = BubbleStyle(0xFFFFE0E6.toInt(), 0xFFC0392B.toInt())
-        val WHISPER = BubbleStyle(0xFFE8E8E8.toInt(), 0xFF666666.toInt())
-        val ANGRY = BubbleStyle(0xFFFF4444.toInt(), 0xFFFFFFFF.toInt())
-        val JEALOUS = BubbleStyle(0xFFE0FFE0.toInt(), 0xFF2E7D32.toInt())
+        /** 日常提醒：光环·灰（深灰光晕渐变，白字） */
+        val NORMAL = BubbleStyle(
+            R.drawable.bubble_halo_gray, 0xFFFFFFFF.toInt(),
+            22.0f, 19.0f, 22.7f, 14.7f, 142f, 60f
+        )
+
+        /** 心动：光环·粉（浅粉光晕，深红字） */
+        val HEART = BubbleStyle(
+            R.drawable.bubble_halo_pink, 0xFFC0392B.toInt(),
+            22.3f, 14.3f, 23.0f, 17.0f, 142f, 60f
+        )
+
+        /** 悄悄话：偷看猫（粉白底，猫猫从右边探头，暖褐字） */
+        val WHISPER = BubbleStyle(
+            R.drawable.bubble_peek_cat, 0xFF5C4040.toInt(),
+            22.7f, 20.0f, 30.0f, 9.0f, 141f, 60f
+        )
+
+        /** 生气：漫画框（黑白粗线漫画格，白字咆哮） */
+        val ANGRY = BubbleStyle(
+            R.drawable.bubble_comic, 0xFFFFFFFF.toInt(),
+            18.0f, 14.0f, 19.0f, 21.7f, 110f, 60f
+        )
+
+        /** 吃醋：月亮兔（夜色淡紫，深紫字） */
+        val JEALOUS = BubbleStyle(
+            R.drawable.bubble_moon_bunny, 0xFF453B78.toInt(),
+            34.3f, 15.7f, 29.3f, 26.0f, 126f, 60f
+        )
     }
 }
