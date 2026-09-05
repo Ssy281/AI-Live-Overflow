@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.NotificationCompat;
 
 import com.ssy281.liveoverflow.MainActivity;
@@ -66,6 +67,12 @@ public class OverlayService extends Service {
     };
 
     private final Random random = new Random();
+
+    // 长按控制菜单 + 皮肤
+    private AlertDialog menuDialog;
+    private int skinBgRes = 0;          // 0 = 默认红色气泡
+    private int skinTextColor = Color.WHITE;
+    private static final int DEFAULT_BUBBLE_COLOR = 0xCCFF6B6B;
 
     @Override
     public void onCreate() {
@@ -164,8 +171,8 @@ public class OverlayService extends Service {
                         float dx = event.getRawX() - initialTouchX;
                         float dy = event.getRawY() - initialTouchY;
                         if (duration > 500) {
-                            // 长按：按住超过半秒直接触发第三组撒娇台词，不受位移影响
-                            onPetClick(3);
+                            // 长按：弹出皮肤切换/停止控制菜单
+                            showPetMenu();
                         } else if (Math.abs(dx) < 15 && Math.abs(dy) < 15) {
                             // 短按：随机台词
                             onPetClick(random.nextInt(2) == 0 ? 1 : 2);
@@ -182,6 +189,55 @@ public class OverlayService extends Service {
         String msg = pool[random.nextInt(pool.length)];
         showBubble(msg);
         Toast.makeText(OverlayService.this, "许星阔在此~", Toast.LENGTH_SHORT).show();
+    }
+
+    // ===== 长按控制菜单：皮肤切换 / 停止桌宠 =====
+    private void showPetMenu() {
+        if (menuDialog != null && menuDialog.isShowing()) return;
+        final String[] items = {"自动", "普通", "心动", "悄悄话", "生气", "吃醋", "停止桌宠"};
+        menuDialog = new AlertDialog.Builder(this)
+                .setTitle("许星阔的控制菜单")
+                .setItems(items, (dialog, which) -> {
+                    switch (which) {
+                        case 0: applySkin(0, Color.WHITE); showBubble("已切回自动气泡~"); break;
+                        case 1: applySkin(R.drawable.bubble_halo_gray, Color.WHITE); showBubble("已切换：普通气泡"); break;
+                        case 2: applySkin(R.drawable.bubble_halo_pink, 0xFFC0392B); showBubble("已切换：心动气泡"); break;
+                        case 3: applySkin(R.drawable.bubble_peek_cat, 0xFF5C4040); showBubble("已切换：悄悄话气泡"); break;
+                        case 4: applySkin(R.drawable.bubble_comic, Color.WHITE); showBubble("已切换：生气气泡"); break;
+                        case 5: applySkin(R.drawable.bubble_moon_bunny, 0xFF453B78); showBubble("已切换：吃醋气泡"); break;
+                        case 6: stopPet(); break;
+                    }
+                })
+                .create();
+        if (menuDialog.getWindow() != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                menuDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+            } else {
+                menuDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_PHONE);
+            }
+        }
+        menuDialog.show();
+    }
+
+    private void applySkin(int bgRes, int textColor) {
+        skinBgRes = bgRes;
+        skinTextColor = textColor;
+        if (bubbleView != null) {
+            if (bgRes != 0) {
+                bubbleView.setBackgroundResource(bgRes);
+            } else {
+                bubbleView.setBackgroundColor(DEFAULT_BUBBLE_COLOR);
+            }
+            bubbleView.setTextColor(textColor);
+        }
+    }
+
+    private void stopPet() {
+        if (menuDialog != null && menuDialog.isShowing()) {
+            menuDialog.dismiss();
+        }
+        stopForeground(true);
+        stopSelf();
     }
 
     private void createBubbleView() {
@@ -213,6 +269,12 @@ public class OverlayService extends Service {
     private void showBubble(String text) {
         bubbleHandler.removeCallbacksAndMessages(null);
         bubbleView.setText(text);
+        if (skinBgRes != 0) {
+            bubbleView.setBackgroundResource(skinBgRes);
+        } else {
+            bubbleView.setBackgroundColor(DEFAULT_BUBBLE_COLOR);
+        }
+        bubbleView.setTextColor(skinTextColor);
         bubbleView.setVisibility(View.VISIBLE);
         // 位置跟随悬浮窗
         bubbleParams.x = params.x;
