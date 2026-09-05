@@ -19,9 +19,20 @@ class BubbleManager(private val context: Context) {
     private var bubbleView: View? = null
     private val handler = Handler(Looper.getMainLooper())
 
+    /** 手动皮肤覆盖：非空时所有气泡固定用该皮肤，null = 随情绪自动选择 */
+    @Volatile
+    private var skinOverride: BubbleStyle? = null
+
+    fun setSkinOverride(style: BubbleStyle?) {
+        skinOverride = style
+    }
+
+    fun isSkinOverridden(): Boolean = skinOverride != null
+
     private fun dp(v: Float): Int = (v * context.resources.displayMetrics.density).toInt()
 
-        fun showBubble(text: String, style: BubbleStyle, overlayY: Int = 120) {
+    fun showBubble(text: String, style: BubbleStyle, overlayY: Int = 120) {
+        val active = skinOverride ?: style
         val bubbleY = if (overlayY > 180) overlayY - 160 else 80
         handler.post {
             removeBubble()
@@ -29,11 +40,11 @@ class BubbleManager(private val context: Context) {
             val tv = TextView(context).apply {
                 this.text = text
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                setBackgroundResource(style.bgRes)
-                setTextColor(style.textColor)
-                setPadding(dp(style.padL), dp(style.padT), dp(style.padR), dp(style.padB))
-                minWidth = dp(style.minW)
-                minHeight = dp(style.minH)
+                setBackgroundResource(active.bgRes)
+                setTextColor(active.textColor)
+                setPadding(dp(active.padL), dp(active.padT), dp(active.padR), dp(active.padB))
+                minWidth = dp(active.minW)
+                minHeight = dp(active.minH)
                 gravity = Gravity.CENTER
                 elevation = 8f
             }

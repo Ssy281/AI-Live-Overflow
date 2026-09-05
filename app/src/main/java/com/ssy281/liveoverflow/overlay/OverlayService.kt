@@ -1,6 +1,7 @@
 package com.ssy281.liveoverflow.overlay
 
 import android.animation.ObjectAnimator
+import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -57,7 +58,7 @@ class OverlayService : Service() {
         gestureEngine = GestureEngine(
             onClick = { onPetClick(1) },
             onDoubleClick = { onPetClick(2) },
-            onLongPress = { onPetClick(3) },
+            onLongPress = { showPetMenu() },
             onFling = { bubbleManager?.showBubble("呜哇——！", BubbleStyle.ANGRY) }
         )
 
@@ -171,6 +172,62 @@ class OverlayService : Service() {
     private fun removeOverlayView() {
         try { wm.removeView(overlayView) } catch (_: Exception) {}
         try { wm.removeView(heatOverlay) } catch (_: Exception) {}
+    }
+
+    /** 长按桌宠弹出控制菜单：手动换气泡皮肤 / 停止桌宠 */
+    private fun showPetMenu() {
+        val items = arrayOf(
+            "气泡皮肤：自动（随心情）",
+            "气泡皮肤：普通",
+            "气泡皮肤：心动",
+            "气泡皮肤：悄悄话",
+            "气泡皮肤：生气",
+            "气泡皮肤：吃醋",
+            "停止桌宠"
+        )
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("许星阔桌宠")
+            .setItems(items) { _, which ->
+                when (which) {
+                    0 -> {
+                        bubbleManager?.setSkinOverride(null)
+                        bubbleManager?.showBubble("好啦，恢复自动换肤~", BubbleStyle.NORMAL)
+                    }
+                    1 -> {
+                        bubbleManager?.setSkinOverride(BubbleStyle.NORMAL)
+                        bubbleManager?.showBubble("切换到：普通气泡", BubbleStyle.NORMAL)
+                    }
+                    2 -> {
+                        bubbleManager?.setSkinOverride(BubbleStyle.HEART)
+                        bubbleManager?.showBubble("切换到：心动气泡", BubbleStyle.HEART)
+                    }
+                    3 -> {
+                        bubbleManager?.setSkinOverride(BubbleStyle.WHISPER)
+                        bubbleManager?.showBubble("切换到：悄悄话气泡", BubbleStyle.WHISPER)
+                    }
+                    4 -> {
+                        bubbleManager?.setSkinOverride(BubbleStyle.ANGRY)
+                        bubbleManager?.showBubble("切换到：生气气泡", BubbleStyle.ANGRY)
+                    }
+                    5 -> {
+                        bubbleManager?.setSkinOverride(BubbleStyle.JEALOUS)
+                        bubbleManager?.showBubble("切换到：吃醋气泡", BubbleStyle.JEALOUS)
+                    }
+                    6 -> {
+                        bubbleManager?.setSkinOverride(null)
+                        stopSelf()
+                    }
+                }
+            }
+            .create()
+        // 悬浮窗场景必须用 overlay 类型窗口，否则弹不出来
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            dialog.window?.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY)
+        } else {
+            @Suppress("DEPRECATION")
+            dialog.window?.setType(WindowManager.LayoutParams.TYPE_PHONE)
+        }
+        dialog.show()
     }
 
     private fun onPetClick(taps: Int) {
